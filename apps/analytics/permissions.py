@@ -1,12 +1,21 @@
-from rest_framework import permissions
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-class IsAuthenticatedOrReadOnly(permissions.BasePermission):
+class IsAuthenticatedOrReadOnly(BasePermission):
     """
-    Разрешает просмотр данных для всех пользователей, а изменение — только для аутентифицированных пользователей.
+    Разрешение для доступа только аутентифицированным пользователям.
+    Неаутентифицированные пользователи могут только читать данные.
     """
     def has_permission(self, request, view):
-        # Если запрос является "безопасным" (т.е. только чтение), разрешаем всем
-        if request.method in permissions.SAFE_METHODS:
+        if request.method in SAFE_METHODS:
             return True
-        # Иначе разрешаем только аутентифицированным пользователям
         return request.user and request.user.is_authenticated
+
+
+class IsOwnerOrReadOnly(BasePermission):
+    """
+    Разрешение на доступ только для владельца объекта.
+    """
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return obj.user == request.user
