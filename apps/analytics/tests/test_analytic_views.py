@@ -42,7 +42,8 @@ class AnalyticsViewTests(TestCase):
 
         # Проверяем, что данные истории просмотров корректны
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['listing'], self.listing.id)
+        # Сравниваем id объявления
+        self.assertEqual(response.data[0]['listing']['id'], self.listing.id)
 
     def test_search_history(self):
         # Тестируем просмотр истории поиска
@@ -57,12 +58,12 @@ class AnalyticsViewTests(TestCase):
         # Тестируем историю просмотров для неавторизованного пользователя
         self.client.logout()  # Удаляем аутентификацию
         response = self.client.get('/api/v1/analytics/view-history/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)  # Изменено на 401
         self.assertEqual(response.data['detail'], 'Для просмотра истории необходимо авторизоваться.')
 
     def test_unauthenticated_search_history(self):
         # Тестируем историю поиска для неавторизованного пользователя
         self.client.logout()  # Удаляем аутентификацию
         response = self.client.get('/api/v1/analytics/search-history/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)  # Изменено на 401
         self.assertEqual(response.data['detail'], 'Для просмотра истории поиска необходимо авторизоваться.')
